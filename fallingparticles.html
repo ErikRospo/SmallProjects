@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            background: black;
+            /* display: block; */
+        }
+        
+        #canvas1 {
+            width: 1280px;
+            height: 720px;
+            border: 1px white solid;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+        
+        .in-div {
+            border: none;
+            border-radius: 50px;
+            position: absolute;
+            bottom: 0;
+            left: 92%;
+            width: 100px;
+            height: 60px;
+            transform: rotate(90deg) translate(-50%, -50%);
+            background: transparent;
+            font: 12pt white bolder;
+        }
+        
+        .modeTextClass {
+            font: 12pt white bolder;
+            color: white;
+            top: 0%;
+            left: 0%;
+            user-select: none;
+        }
+        
+        #resetButtonDiv {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100px;
+            height: 50px;
+        }
+        
+        #resetButton {
+            position: inherit;
+            background-color: red;
+            width: inherit;
+            height: inherit;
+            font: large bolder white;
+            color: white;
+            border-radius: 20px;
+            border-color: transparent;
+            border-width: 0px;
+            cursor: pointer;
+            user-select: none;
+        }
+        
+        #selectorText {
+            color: white;
+            position: absolute;
+            bottom: 13%;
+            right: 5px;
+            width: 100px;
+            height: 60px;
+            background: transparent;
+            margin-right: 0px;
+            user-select: none;
+        }
+        
+        #UrlInput {
+            /* NEED TO REMOVE THIS TO VIEW THE INPUT */
+            display: none;
+        }
+    </style>
+    <title>Particle Rain</title>
+</head>
+
+<body>
+    <span class="modeTextClass">Particles:</span>
+    <span class="modeTextClass" id="ParticleNumberValue"></span>
+    <br>
+    <input type="range" min="1000" max="20000" step="1000" name="Mode" class="modeTextClass" id="NumberSelector" list="tickmarks">
+    <br>
+    <datalist id="tickmarks">
+        <option value="1000" label="1000"></option>
+        <option value="1000"></option>
+        <option value="2000"></option>
+        <option value="3000"></option>
+        <option value="4000"></option>
+        <option value="5000" label="5000"></option>
+        <option value="6000"></option>
+        <option value="7000"></option>
+        <option value="8000"></option>
+        <option value="9000"></option>
+        <option value="10000" label="10000"></option>
+        <option value="11000"></option>
+        <option value="12000"></option>
+        <option value="13000"></option>
+        <option value="14000"></option>
+        <option value="15000" label="15000"></option>
+        <option value="16000"></option>
+        <option value="17000"></option>
+        <option value="18000"></option>
+        <option value="19000"></option>
+        <option value="20000" label="20000"></option>
+        </datalist>
+    <label class="modeTextClass" for="mode-select">Select a mode:</label>
+    <select class="modeTextClass" name="mode" id="mode-select">
+        <option class="modeTextClass" value="linear-down">Linear down</option>
+        <option class="modeTextClass" value="linear-up">Linear up</option>
+        <option class="modeTextClass" value="linear-right">Linear right</option>
+        <option class="modeTextClass" value="linear-left">Linear left</option>
+        <option class="modeTextClass" value="radial-in">Radial in</option>
+        <option class="modeTextClass" value="radial-out">Radial out</option>
+        <option class="modeTextClass" value="spiral-right-in">Sprial right in</option>
+        <option class="modeTextClass" value="spiral-left-in">Sprial left in</option>
+        <option class="modeTextClass" value="spiral-right-out">Sprial right out</option>
+        <option class="modeTextClass" value="spiral-left-out">Sprial left out</option>
+    </select>
+    <br>
+    <input type="url" name="" id="UrlInput">
+    <!-- NEED TO REMOVE DISPLAY:NONE FROM STYLING! -->
+    <canvas id="canvas1"></canvas>
+    <div id="resetButtonDiv">
+        <button id="resetButton">Reset</button>
+    </div>
+    <script>
+        const queryString = window.location.search;
+        const urlParamter = new URLSearchParams(queryString);
+        const UrlInput = document.getElementById("UrlInput");
+
+        let modev = 1;
+        //change the following url for the image
+        let image = "https://upload.wikimedia.org/wikipedia/commons/thumb/e/ea/Van_Gogh_-_Starry_Night_-_Google_Art_Project.jpg/1280px-Van_Gogh_-_Starry_Night_-_Google_Art_Project.jpg";
+        urlParamter.forEach((value, key) => {
+            switch (key) {
+                case "mode":
+                    modev = ParseInt(value);
+                    break;
+                case "image":
+                    image = value;
+                    break;
+                default:
+                    break;
+            }
+        })
+        const image1 = new Image();
+        const ModeSelector = document.getElementById("mode-select");
+        const resetButton = document.getElementById("resetButton");
+        const ParticleNumberSelector = document.getElementById("NumberSelector");
+        const ParticleNumberValue = document.getElementById("ParticleNumberValue");
+        image1.src = image;
+        image1.crossOrigin = "Anonymous";
+        const ScalingFactor = 1;
+        let mode = modev;
+        /*
+        mode=1:linear down
+        mode=2:linear up
+        mode=3:linear right
+        mode=4:linear left
+        mode=5:radial in
+        mode=6:radial out
+        mode=7:Spiral right
+        mode=8:Spiral left
+        */
+        const modeList = [
+            "Linear down",
+            "Linear up",
+            "Linear right",
+            "Linear left",
+            "Radial in",
+            "Radial out",
+            "Spiral right in",
+            "Spiral left in",
+            "Spiral right out",
+            "Sprial left out"
+        ];
+        ModeSelector.selected = "Linear down"
+            // ModeSelector.value = mode.toString();
+        ModeSelector.addEventListener("input", () => {
+            let ModeOptions = ModeSelector.children;
+            for (let index = 0; index < ModeOptions.length; index++) {
+                const element = ModeOptions[index];
+                if (element.selected) {
+                    mode = index + 1;
+                }
+
+            }
+        });
+        class Point {
+            constructor(x, y) {
+                this.x = x;
+                this.y = y;
+            }
+        }
+        UrlInput.addEventListener("focusout", () => {
+            console.log(UrlInput);
+            value = UrlInput.value;
+            console.log(value);
+        })
+        image1.addEventListener("load", () => {
+
+            const canvas = document.getElementById("canvas1");
+            const ctx = canvas.getContext("2d");
+            canvas.height = 720 * ScalingFactor;
+            canvas.width = 1280 * ScalingFactor;
+            const ch = canvas.height;
+            const cw = canvas.width;
+            const cp = new Point(cw / 2, ch / 2);
+            const thresh = 2.5;
+            ctx.drawImage(image1, 0, 0, cw, ch);
+            const pixels = ctx.getImageData(0, 0, cw, ch);
+            const data = pixels.data;
+            ctx.fillStyle = "black";
+            ctx.fillRect(0, 0, cw, ch);
+            let brightnessMinumum = 0;
+            let brightnessMaximum = 0;
+            let particlesArray = [];
+            /*
+            5000: low end computers
+            10000: mid range computers
+            15000: medium-high end computers
+            20000: high end computers.
+            */
+            let numberOfParticles = 10000;
+            ParticleNumberValue.innerText = numberOfParticles;
+            ParticleNumberSelector.value = numberOfParticles;
+            let mappedImage = [];
+            for (let y = 0; y < ch; y++) {
+                let row = [];
+                for (let x = 0; x < cw; x++) {
+                    const red = Math.min(data[(y * 4 * cw) + (x * 4) + 0], 255);
+                    const green = Math.min(data[(y * 4 * cw) + (x * 4) + 1], 255);
+                    const blue = Math.min(data[(y * 4 * cw) + (x * 4) + 2], 255);
+                    const brightness = calculateRelativeBrightness(red, green, blue);
+                    brightnessMaximum = Math.max(brightness, brightnessMaximum);
+                    brightnessMinumum = Math.min(brightness, brightnessMinumum);
+                    const cell = [brightness, red, green, blue];
+                    row.push(cell);
+                }
+                mappedImage.push(row);
+            }
+
+
+
+            if (mappedImage.find((value) => {
+                    return value == NaN;
+                })) {
+                console.error("one of the values of mapped image is NaN");
+            }
+            console.log(data);
+            console.log(mappedImage);
+            console.log(brightnessMaximum);
+            console.log(brightnessMinumum);
+
+            function map(input, input_start, input_end, output_start, output_end) {
+                return output_start + ((output_end - output_start) / (input_end - input_start)) * (input - input_start);
+            }
+
+            function distance(x1, y1, x2, y2) {
+                return Math.sqrt((x1 - x2) * (x1 - x2) + (y1 - y2) * (y1 - y2));
+            }
+
+            function threshold(p1, p2, t) {
+                // \left(\left(a.x-b.x\right)^{2}+\left(a.y-b.y\right)^{2}\right)^{0.5}-t<0:1,0
+                return (Math.sqrt(((p1.x - p2.x) ** 2 + (p1.y - p2.y) ** 2)) - (2 * t) < 0);
+            }
+
+            function calculateRelativeBrightness(red, green, blue) {
+                return Math.sqrt(
+                    (red * red) * 0.299 +
+                    (green * green) * 0.587 +
+                    (blue * blue) * 0.114
+                ) / 100;
+            }
+
+            class Particle {
+                constructor() {
+                    this.x = Math.random() * cw;
+                    this.y = Math.random() * ch;
+                    this.speed = 0;
+                    this.color = "";
+                    this.size = Math.random() * 2 + 2;
+                    this.positiony = Math.floor(this.y);
+                    this.positionx = Math.floor(this.x);
+                    this.point = new Point(this.x, this.y);
+                }
+                shuffle() {
+                    this.x = Math.random() * cw;
+                    this.y = Math.random() * ch;
+                }
+                centerShuffle() {
+                    this.x = map(Math.random(), 0, 1, (cw / 2) - 10, (cw / 2) + 10);
+                    this.y = map(Math.random(), 0, 1, (ch / 2) - 10, (ch / 2) + 10);
+                }
+                update() {
+                    this.positiony = Math.floor(this.y);
+                    this.positionx = Math.floor(this.x);
+                    this.point = new Point(this.x, this.y);
+
+                    this.dist = distance(this.x, this.y, cw / 2, ch / 2);
+                    this.speed = map(mappedImage[this.positiony][this.positionx][0],
+                        brightnessMinumum,
+                        brightnessMaximum, 3, 0.025);
+                    switch (mode) {
+                        case 1:
+                            this.y += this.speed;
+                            if (this.y > ch) {
+                                this.shuffle();
+                            }
+                            break;
+                        case 2:
+                            this.y -= this.speed;
+                            if (this.y <= 0) {
+                                this.shuffle()
+                            }
+                            break;
+                        case 3:
+                            this.x += this.speed;
+                            if (this.y > cw) {
+                                this.shuffle();
+                            }
+                            break;
+                        case 4:
+                            this.x -= this.speed;
+                            if (this.x <= 0) {
+                                this.shuffle();
+                            }
+                            break;
+                        case 5:
+                            this.angle = Math.atan2(this.y - ch / 2, this.x - cw / 2);
+                            this.x = this.x - Math.cos(this.angle) * this.speed;
+                            this.y = this.y - Math.sin(this.angle) * this.speed;
+                            if ((Math.round(this.x) == Math.round(cw / 2)) &&
+                                (Math.round(this.y) == Math.round(ch / 2))) {
+                                this.shuffle();
+                            }
+                            break;
+                        case 6:
+                            this.angle = Math.atan2(this.y - ch / 2, this.x - cw / 2);
+                            this.x = this.x + Math.cos(this.angle) * this.speed;
+                            this.y = this.y + Math.sin(this.angle) * this.speed;
+                            if ((this.x >= cw) || (this.x <= 0) || (this.y >= ch) || (this.y <= 0)) {
+                                this.centerShuffle();
+                                // this.x = cw / 2;
+                                // this.y = ch / 2;
+                            }
+                            break;
+                        case 7:
+                            this.angle = Math.atan2(this.y - ch / 2, this.x - cw / 2);
+                            this.x = this.x - Math.cos(this.angle - (Math.PI / 3)) * this.speed;
+                            this.y = this.y - Math.sin(this.angle - (Math.PI / 3)) * this.speed;
+                            if ((Math.round(this.x) == Math.round(cw / 2)) &&
+                                (Math.round(this.y) == Math.round(ch / 2))) {
+                                this.shuffle();
+                            }
+                            if (threshold(this.point, cp, thresh)) {
+                                this.shuffle();
+                            }
+                            break;
+                        case 8:
+                            this.angle = Math.atan2(this.y - ch / 2, this.x - cw / 2);
+                            this.x = this.x - Math.cos(this.angle + (Math.PI / 3)) * this.speed;
+                            this.y = this.y - Math.sin(this.angle + (Math.PI / 3)) * this.speed;
+                            if ((Math.round(this.x) == Math.round(cw / 2)) &&
+                                (Math.round(this.y) == Math.round(ch / 2))) {
+                                this.shuffle();
+                            }
+                            if (threshold(this.point, cp, thresh)) {
+                                this.shuffle()
+
+                            }
+                            break;
+                        case 9:
+                            this.angle = Math.atan2(this.y - ch / 2, this.x - cw / 2);
+                            this.x = this.x + Math.cos(this.angle - (Math.PI / 3)) * this.speed;
+                            this.y = this.y + Math.sin(this.angle - (Math.PI / 3)) * this.speed;
+                            if ((Math.round(this.x) == Math.round(cw / 2)) &&
+                                (Math.round(this.y) == Math.round(ch / 2))) {
+                                this.centerShuffle();
+                                // this.shuffle();
+                            }
+                            if (threshold(this.point, cp, thresh)) {
+                                this.centerShuffle();
+                                // this.shuffle();
+                            }
+                            break;
+                        case 10:
+                            this.angle = Math.atan2(this.y - ch / 2, this.x - cw / 2);
+                            this.x = this.x + Math.cos(this.angle + (Math.PI / 3)) * this.speed;
+                            this.y = this.y + Math.sin(this.angle + (Math.PI / 3)) * this.speed;
+                            if ((Math.round(this.x) == Math.round(cw / 2)) &&
+                                (Math.round(this.y) == Math.round(ch / 2))) {
+                                this.centerShuffle();
+                                // this.shuffle();
+                            }
+                            if (threshold(this.point, cp, thresh)) {
+                                this.centerShuffle();
+                                // this.shuffle();
+                            }
+                            break;
+                        default:
+                            break;
+                    }
+                    if ((this.y >= ch || this.y < 1) || (this.x >= cw || this.x < 1)) {
+                        this.shuffle();
+                    }
+                    this.r = mappedImage[this.positiony][this.positionx][1];
+                    this.g = mappedImage[this.positiony][this.positionx][2];
+                    this.b = mappedImage[this.positiony][this.positionx][3];
+
+                }
+                draw() {
+
+                    this.color = `rgb(${this.r+15},${this.g+15},${this.b+15})`;
+                    ctx.beginPath();
+                    ctx.fillStyle = this.color;
+                    ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+            }
+
+            function clearScreen() {
+                // ctx.globalAlpha = 0.025;
+                ctx.fillStyle = "black";
+                ctx.fillRect(0, 0, cw, ch);
+            }
+
+            function init() {
+                for (let i = 0; i < numberOfParticles; i++) {
+                    particlesArray.push(new Particle());
+                }
+            }
+            init();
+            resetButton.addEventListener("click", () => {
+                particlesArray.forEach((value) => {
+                    value.shuffle();
+                })
+                clearScreen();
+            });
+            ParticleNumberSelector.addEventListener("change", () => {
+                numberOfParticles = ParticleNumberSelector.value;
+                ParticleNumberValue.innerText = numberOfParticles;
+                for (let i = 0; i < particlesArray.length; i++) {
+                    particlesArray.pop();
+                }
+                for (let i = 0; i < numberOfParticles; i++) {
+                    particlesArray.push(new Particle());
+                }
+                while (particlesArray.length != numberOfParticles) {
+                    if (particlesArray.length < numberOfParticles) {
+                        particlesArray.push(new Particle());
+                    }
+                    if (numberOfParticles < particlesArray.length) {
+                        particlesArray.pop();
+                    }
+                }
+                clearScreen();
+            });
+
+            function animate() {
+
+                clearScreen();
+                // ctx.drawImage(image1, 0, 0, cw, ch);
+                for (let index = 0; index < particlesArray.length; index++) {
+                    particlesArray[index].update();
+                    particlesArray[index].draw();
+
+                }
+                requestAnimationFrame(animate);
+            }
+            animate();
+        });
+    </script>
+</body>
+
+</html>
+
+</html>
