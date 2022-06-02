@@ -226,7 +226,7 @@
                     for (let i = 0; i < l.length; i++) {
                         let x1 = x + sin(l[i] * a) * x / 2;
                         let y1 = y + cos(l[i] + a) * y / 2;
-                        if (i == 0 || i % (RenderModSelector.value) == 0) {
+                        if (i == 0 || i % (RenderModSelector.value) != 0) {
                             ctx.moveTo(x1, y1);
                         } else {
                             ctx.lineTo(x1, y1);
