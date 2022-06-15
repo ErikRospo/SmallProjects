@@ -3,10 +3,12 @@ class Steganograph {
         /** @type {HTMLCanvasElement} */
         this.canvas = canvas;
         this.image = image;
-        this.message = message;
+        this.message = message + "\n";
+        /** @type {CanvasRenderingContext2D} */
         this.ctx = canvas.getContext('2d');
         this.ctx.drawImage(image, 0, 0);
         this.imageData = this.ctx.getImageData(0, 0, image.width, image.height);
+        this.ctx.clearRect(0, 0, image.width, image.height);
         this.data = this.imageData.data;
         this.width = image.width;
         this.height = image.height;
@@ -81,11 +83,10 @@ function main() {
     document.body.appendChild(canvas);
     let message;
     /**@type {HTMLObjectElement} */
-    let messagesource = document.getElementById('message');
-    message = messagesource.data;
+    //let messagesource = document.getElementById('message');
+    //message = messagesource.data;
+    message = "This is a test of how messages can be hidden with the LSB of images. This method works with practically any image."
 
-    // message = "1.because as the sun burns heavier and heavier elements, they produce more and more energy.\n2. it would have helped, because early forms of life didn't need as much sun as their modern counterparts\n3. because it helped early thermohphiles gain and keep heat.\n3. the huronian glaciaction is accociated with a rise in oxygen.\n4. at least one.\n5. deep sea ice cores.\n6. bacteria consumed the co2, and died, turning into carbon.\n7. the land plants consume the co2 gas, thus lowering the concentration in the atmosphere. \n8. increased animals, consuming oxygen, and producing carbon dioxide, a greenhouse gas, thus increasing the tempature.\n9. because it just did. that is why. i am not going to further elaborate.\n\nEOF";
-    // console.log(message);
     let steganograph = new Steganograph(canvas, image, message);
     let encoded = steganograph.encode();
     let decoded = steganograph.decode(image);
