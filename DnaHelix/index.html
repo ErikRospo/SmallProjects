@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            /* background: black; */
+            /* display: block; */
+        }
+        
+        input {
+            border: none;
+            outline: none;
+            background: none;
+            font-size: 1.5em;
+            font-family: 'Roboto', sans-serif;
+            color: #fff;
+            font-weight: bold;
+            text-align: center;
+            transition: all 0.3s ease-in-out;
+        }
+        
+        div {
+            display: block;
+        }
+        
+        span {
+            display: block;
+        }
+        
+        #Canvas {
+            background-color: #000;
+            width: 100%;
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            position: absolute;
+            top: 0;
+            left: 0;
+            z-index: -1;
+        }
+        
+        .modeTextClass {
+            font: 12pt white bolder;
+            color: white;
+            top: 0%;
+            left: 0%;
+            user-select: none;
+        }
+    </style>
+</head>
+
+<body>
+    <div>
+        <div>
+            <span class="modeTextClass">Detail:</span>
+            <span class="modeTextClass" id="DetailValue">0</span>
+            <input type="range" min="1" max="100" step="1" name="Detail" class="modeTextClass" id=DetailSelector style="width:100px">
+        </div>
+        <div>
+            <span class="modeTextClass">Curves</span>
+            <span class="modeTextClass" id="CurveDetailValue">0</span>
+            <input type="range" min="1" max="5" step="0.1" name="CurveDetail" class="modeTextClass" id=CurveDetailSelector style="width:100px">
+        </div>
+        <div>
+            <span class="modeTextClass">RenderMod</span>
+            <span class="modeTextClass" id="RenderModValue">0</span>
+            <input type="range" min="1" max="10" step="1" name="RenderMod" class="modeTextClass" id=RenderModSelector style="width:100px">
+        </div>
+        <div>
+            <label style="color:white">
+                <input type="checkbox" name="useRainbow" id="useRainbow">
+                Rainbow
+            </label>
+        </div>
+        <div id="colorSelectorDiv">
+            <span class="modeTextClass">Color</span>
+            <span class="modeTextClass" id="ColorValue"></span>
+            <input type="color" name="ColorVal" id="ColorValueInput" value="#ffffff">
+        </div>
+        <div>
+            <span class="modeTextClass">Clear Canvas</span>
+
+            <input type="checkbox" id="ClearCanvas">
+        </div>
+        <div>
+            <button id="clearButton">Clear</button>
+        </div>
+        <script>
+            document.addEventListener("DOMContentLoaded", function(event) {
+                console.log("DOM fully loaded and parsed");
+                // BEGIN dom getters
+                var DetailSelector = document.getElementById("DetailSelector");
+                var DetailValue = document.getElementById("DetailValue");
+                var CurveDetailSelector = document.getElementById("CurveDetailSelector");
+                var CurveDetailValue = document.getElementById("CurveDetailValue");
+                var RenderModSelector = document.getElementById("RenderModSelector");
+                var RenderModValue = document.getElementById("RenderModValue");
+                var ColorValueInput = document.getElementById("ColorValueInput");
+                var ColorValue = document.getElementById("ColorValue");
+                var ColorDiv = document.getElementById("colorSelectorDiv");
+                var useRainbow = document.getElementById("useRainbow");
+                var ClearCanvas = document.getElementById("ClearCanvas");
+                var clearButton = document.getElementById("clearButton");
+                ClearCanvas.checked = true;
+                // END dom getters
+                //TODO: Make a checkbox for whether to clear the canvas before drawing
+                //TODO: Make a reset/clear button or both
+                console.log(DetailSelector);
+                console.log(DetailValue);
+                console.log(CurveDetailSelector);
+                console.log(CurveDetailValue);
+                console.log(RenderModSelector);
+                console.log(RenderModValue);
+                console.log(ColorValueInput);
+                console.log(ColorValue);
+                console.log(ColorDiv);
+                console.log(useRainbow);
+
+                var canvas = document.getElementById("Canvas");
+                var ctx = canvas.getContext("2d");
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight;
+
+                let w = canvas.width;
+                let h = canvas.height;
+                let x = w / 2;
+                let y = h / 2;
+                let t = 100; //controls the detail
+                let a = 0; //the angle
+                let l = []; //a list of values to be mapped
+                const pi = Math.PI;
+                const cos = Math.cos;
+                const sin = Math.sin;
+                for (let i = 0; i < 2 * t * pi; i += pi) {
+                    l.push((i / t) - pi);
+                }
+                let s = 1; //the muliplier for the number of curves
+                let now = 0; // the time of the current frame
+                let then = 0; // the time of the past frame
+                let b = 0; // this stores the time of the last frame
+                let fs = 10; // font size
+                let td = false; // whether we draw the text.
+                let rb = true
+                    // BEGIN dom event listeners
+                DetailSelector.addEventListener("input", function() {
+                    DetailValue.innerHTML = DetailSelector.value;
+                    t = DetailSelector.value;
+                    l = [];
+                    for (let i = 0; i < 2 * t * pi; i += pi) {
+                        l.push((i / t) - pi);
+                    }
+
+                });
+                CurveDetailSelector.addEventListener("input", function() {
+                    CurveDetailValue.innerHTML = CurveDetailSelector.value;
+                    s = CurveDetailSelector.value;
+                    a = 0;
+                });
+                RenderModSelector.addEventListener("input", function() {
+                    RenderModValue.innerHTML = RenderModSelector.value;
+                });
+                ColorValueInput.addEventListener("input", function() {
+                    ColorValue.style.color = ColorValueInput.value;
+                });
+                useRainbow.addEventListener("change", function() {
+                    if (useRainbow.checked) {
+                        ColorDiv.style.display = "none";
+                    } else {
+                        ColorDiv.style.display = "block";
+                    }
+                    rb = useRainbow.checked;
+                });
+                ClearCanvas.addEventListener("change", function() {
+                    if (ClearCanvas.checked) {
+                        ctx.clearRect(0, 0, w, h);
+                    }
+                });
+                clearButton.addEventListener("click", function() {
+                    ctx.clearRect(0, 0, w, h);
+                });
+                // END dom event listeners
+                function map(n, start1, stop1, start2, stop2) {
+                    return ((n - start1) / (stop1 - start1)) * (stop2 - start2) + start2;
+                }
+                ctx.strokeStyle = "white";
+
+                function animate(_) {
+                    now = Date.now();
+                    b = then
+                    let dt = now - then;
+                    then = now;
+                    if (ClearCanvas.checked) {
+                        ctx.clearRect(0, 0, w, h);
+                    }
+                    if (td) {
+                        ctx.font = fs + "px monospace"; // set the font
+                        //draw the text
+                        ctx.fillText("FPS: " + Math.round(1000 / dt), 10, fs);
+                        ctx.fillText("DT: " + dt, 10, 2 * fs);
+                        ctx.fillText("x: " + x, 10, 3 * fs);
+                        ctx.fillText("y: " + y, 10, 4 * fs);
+                        ctx.fillText("a: " + a, 10, 5 * fs);
+                        ctx.fillText("now: " + now, 10, 6 * fs);
+                        ctx.fillText("then: " + b, 10, 7 * fs);
+                    }
+                    ctx.beginPath();
+                    ctx.lineWidth = 2;
+                    ctx.moveTo(x, y);
+                    a += dt / 1000
+                    if (a >= s * 2 * pi) {
+                        a = -pi * 2 * s;
+                    }
+                    if (rb) {
+                        ctx.strokeStyle = "hsl(" + map(a, 0, s * pi * 4, 0, 360) + "deg,100%,50%)";
+                    } else {
+                        ctx.strokeStyle = ColorValueInput.value;
+                    }
+                    for (let i = 0; i < l.length; i++) {
+                        let x1 = x + sin(l[i] * a) * x / 2;
+                        let y1 = y + cos(l[i] + a) * y / 2;
+                        if (i == 0 || i % (RenderModSelector.value) == 0) {
+                            ctx.moveTo(x1, y1);
+                        } else {
+                            ctx.lineTo(x1, y1);
+                        }
+                        // ctx.arc(x1, y1, 1, 0, 2 * pi);
+                    }
+                    ctx.stroke();
+
+                    requestAnimationFrame(animate);
+                }
+                requestAnimationFrame(animate);
+            });
+        </script>
+        <canvas id="Canvas"></canvas>
+</body>
+
+</html>
+
+</html>
+
+</html>
