@@ -6,6 +6,7 @@ const readline = require('readline').createInterface({
     input: process.stdin,
     output: process.stdout
 });
+let bit=0;
 class Steganograph {
     constructor(canvas, image, message) {
         /** @type {HTMLCanvasElement} */
@@ -46,11 +47,20 @@ class Steganograph {
         let binmessage = this.tobinary(message);
         let messagebits = binmessage.split('');
         let messagebitslength = messagebits.length;
+        if (messagebitslength > (data.length/4)) {
+            console.log("Message is too long");
+            console.log("Message length: " + messagebitslength);
+            console.log("Image length: " + (data.length/4));
+            console.log("Message overflow: " + (messagebitslength - (data.length/4)));
+
+        }
         for (let i = 0; i <= data.length; i += 4) {
-            if (i < (messagebitslength * 4)) {
-                data[i] = this.setbit(data[i], 0, this.getbit(messagebits[i / 4], 0));
+            if (i <= (messagebitslength * 4)) {
+                data[i] = this.setbit(data[i], bit, this.getbit(messagebits[i / 4], 0));
+            } else if (i<=(messagebitslength*4)+32) {
+                data[i] = this.setbit(data[i], bit, 0);
             } else {
-                data[i] = this.setbit(data[i], 0, 0);
+                data[i]=data[i]
             }
 
         }
@@ -63,19 +73,20 @@ class Steganograph {
         let data = this.data;
         let c = 1
         let recived = "";
-        fs.writeFileSync('image.png', this.canvas.toBuffer("image/png"));
+        let now=new Date().getTime();
+        fs.writeFileSync('Output/Encoding/Out'+now+'.png', this.canvas.toBuffer("image/png"));
 
         for (let i = 0; i <= data.length; i += 1) {
-            recived += this.getbit(data[i * 4], 0);
+            recived += this.getbit(data[i * 4], bit);
             if (c >= 16) {
                 break
             }
             c++;
-            if (this.getbit(data[i * 4], 0) == 1) {
+            if (this.getbit(data[i * 4], bit) == 1) {
                 c = 0;
             }
         }
-        console.log(recived);
+        // console.log(recived);
         recived = recived.replace(/00000000/gi, "")
         let recivedmessage = this.frombinary(recived);
         return recivedmessage;
@@ -97,7 +108,6 @@ class Steganograph {
 let gpath, gmessage;
 readline.question("Encoding or Decoding? (e/d)", (answer) => {
     if (answer == "e") {
-
         readline.question('Enter the path to the image: ', (path) => {
             gpath = path;
             readline.question("Enter the message: ", (message) => {
@@ -115,7 +125,7 @@ readline.question("Encoding or Decoding? (e/d)", (answer) => {
                                 console.log("Error reading file")
                             } else {
                                 gmessage = data.toString()
-                                console.log(gmessage)
+                                // console.log(gmessage)
                                 loadImage(gpath).then(image => { encode(image, gmessage) });
                             }
                         })
@@ -149,13 +159,13 @@ function encode(image, message) {
     let decoded = steganograph.decode();
     message = steganograph.message
     console.assert(message == decoded, "Message was not encoded and decoded correctly");
-    console.log("Message In        : " + message);
-    console.log("Message Out       : " + decoded);
-    console.log("Message length In : " + message.length);
-    console.log("Message length Out: " + decoded.length);
-    console.log("Message Hex In    : " + steganograph.tohex(message));
-    console.log("Message Hex Out   : " + steganograph.tohex(decoded));
-    console.log()
+    // console.log("Message In        : " + message);
+    // console.log("Message Out       : " + decoded);
+    // console.log("Message length In : " + message.length);
+    // console.log("Message length Out: " + decoded.length);
+    // console.log("Message Hex In    : " + steganograph.tohex(message));
+    // console.log("Message Hex Out   : " + steganograph.tohex(decoded));
+    // console.log()
     let now = new Date().getTime();
     canvas.getContext('2d').putImageData(encoded, 0, 0);
     const buffer = canvas.toBuffer('image/jpeg');

@@ -1,2 +1,6 @@
 LSBHidden/Output/Encoding/*.jpg
+LSBHidden/Output/Encoding/*.png
 LSBHidden/Output/Decoding/*.txt
+node_modules/
+package-lock.json
+package.json

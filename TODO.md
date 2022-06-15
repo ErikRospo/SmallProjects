@@ -1,6 +1,12 @@
 - [ ] add the lsb project to the index
-- [ ] make the lsb project more user friendly, and not hard code the input and output
+- [ ] make the lsb project more user friendly
+- [x] not hard code the input and output
 - [x] Make a command line version of lsb
 - [ ] collect other small projects and add to the repo 
 - [x] organize everything into folders
 - [ ] make a lib folder for reused code
+- [ ] make an input (on lsb) for the channel (r,g,b,a?)
+- [ ] make an input (on lsb) for the bit used
+- [ ] make way to generate a "stop" byte, or collection of bytes, to signal the end of text (lsb).
+  - [ ] this is sort of already done (0x03) TODO:implement
+  - [ ] and a start byte (0x02) TODO:implement
