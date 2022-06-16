@@ -66,15 +66,18 @@ class Steganograph {
         }
         this.ctx.createImageData(this.imageData);
         this.ctx.putImageData(this.imageData, 0, 0);
+	let now=new Date().getTime();
+	fs.writeFileSync('Output/Encoding/Out'+now+'.png',this.canvas.toBuffer("image/png"));
         return this.imageData;
-    }
+    
+}
     decode() {
         // this.ctx.clearRect(0, 0, image.width, image.height);
         let data = this.data;
         let c = 1
         let recived = "";
-        let now=new Date().getTime();
-        fs.writeFileSync('Output/Encoding/Out'+now+'.png', this.canvas.toBuffer("image/png"));
+        //let now=new Date().getTime();
+       // fs.writeFileSync('Output/Encoding/Out'+now+'.png', this.canvas.toBuffer("image/png"));
 
         for (let i = 0; i <= data.length; i += 1) {
             recived += this.getbit(data[i * 4], bit);
@@ -166,10 +169,10 @@ function encode(image, message) {
     // console.log("Message Hex In    : " + steganograph.tohex(message));
     // console.log("Message Hex Out   : " + steganograph.tohex(decoded));
     // console.log()
-    let now = new Date().getTime();
-    canvas.getContext('2d').putImageData(encoded, 0, 0);
-    const buffer = canvas.toBuffer('image/jpeg');
-    fs.writeFileSync('Output/Encoding/' + now + '.jpg', buffer);
+    // let now = new Date().getTime();
+    // canvas.getContext('2d').putImageData(encoded, 0, 0);
+    // const buffer = canvas.toBuffer('image/jpeg');
+    // fs.writeFileSync('Output/Encoding/' + now + '.jpg', buffer);
 }
 
 function decode(image) {
