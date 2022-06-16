@@ -6,7 +6,7 @@ const readline = require('readline').createInterface({
     input: process.stdin,
     output: process.stdout
 });
-let bit=0;
+let bit = 0;
 class Steganograph {
     constructor(canvas, image, message) {
         /** @type {HTMLCanvasElement} */
@@ -47,37 +47,36 @@ class Steganograph {
         let binmessage = this.tobinary(message);
         let messagebits = binmessage.split('');
         let messagebitslength = messagebits.length;
-        if (messagebitslength > (data.length/4)) {
+        if (messagebitslength > (data.length / 4)) {
             console.log("Message is too long");
             console.log("Message length: " + messagebitslength);
-            console.log("Image length: " + (data.length/4));
-            console.log("Message overflow: " + (messagebitslength - (data.length/4)));
+            console.log("Image length: " + (data.length / 4));
+            console.log("Message overflow: " + (messagebitslength - (data.length / 4)));
 
         }
         for (let i = 0; i <= data.length; i += 4) {
             if (i <= (messagebitslength * 4)) {
                 data[i] = this.setbit(data[i], bit, this.getbit(messagebits[i / 4], 0));
-            } else if (i<=(messagebitslength*4)+32) {
+            } else if (i <= (messagebitslength * 4) + 32) {
                 data[i] = this.setbit(data[i], bit, 0);
             } else {
-                data[i]=data[i]
+                data[i] = data[i]
             }
 
         }
         this.ctx.createImageData(this.imageData);
         this.ctx.putImageData(this.imageData, 0, 0);
-	let now=new Date().getTime();
-	fs.writeFileSync('Output/Encoding/Out'+now+'.png',this.canvas.toBuffer("image/png"));
+        let now = new Date().getTime();
+        fs.writeFileSync('Output/Encoding/Out' + now + '.png', this.canvas.toBuffer("image/png"));
         return this.imageData;
-    
-}
+    }
     decode() {
         // this.ctx.clearRect(0, 0, image.width, image.height);
         let data = this.data;
         let c = 1
         let recived = "";
         //let now=new Date().getTime();
-       // fs.writeFileSync('Output/Encoding/Out'+now+'.png', this.canvas.toBuffer("image/png"));
+        // fs.writeFileSync('Output/Encoding/Out'+now+'.png', this.canvas.toBuffer("image/png"));
 
         for (let i = 0; i <= data.length; i += 1) {
             recived += this.getbit(data[i * 4], bit);
@@ -128,7 +127,7 @@ readline.question("Encoding or Decoding? (e/d)", (answer) => {
                                 console.log("Error reading file")
                             } else {
                                 gmessage = data.toString()
-                                // console.log(gmessage)
+                                    // console.log(gmessage)
                                 loadImage(gpath).then(image => { encode(image, gmessage) });
                             }
                         })
